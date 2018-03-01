@@ -1,3 +1,5 @@
+//Tomas Ukrinas
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -8,6 +10,9 @@
 #include <netinet/in.h>
 
 int main(int argc, char *argv[]){
+  int messageSize = 100;
+  int howManyConnections = 10;
+
   int serverSocket;
   int clientSocket;
   unsigned int port = 9000;
@@ -21,13 +26,27 @@ int main(int argc, char *argv[]){
   address.sin_addr.s_addr = htonl(INADDR_ANY);
 
   bind(serverSocket, (struct sockaddr *) &address, sizeof(address));
-  printf("Bind was successful\n");
-  listen(serverSocket, 1);
-  printf("Server is listening...\n");
+  printf("Bind was successful\n\n");
 
-  clientSocket = accept(serverSocket, NULL, NULL);
+  char * buffer = (char*)calloc(messageSize, sizeof(char));
+  int n = 0;
+  while(strcmp(buffer, "Last_one") != 0){
+    free(buffer);
+    buffer = (char*)calloc(messageSize, sizeof(char));
+    listen(serverSocket, howManyConnections);
+    printf("Server is listening...\n\n");
 
-  printf("Client connected!!\n");
+    clientSocket = accept(serverSocket, NULL, NULL);
+    printf("Client connected!!\n");
+    n++;
+
+    printf("Waiting for message..\n");
+    recv(clientSocket, buffer, messageSize, 0);
+    printf("Recieved message: %s\n", buffer);
+    printf("Message size: %d\n\n", (int) strlen(buffer));
+  }
+
+  printf("There was %d connections in total.\n", n);
 
   return 0;
 }
