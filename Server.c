@@ -29,24 +29,22 @@ int main(int argc, char *argv[]){
   printf("Bind was successful\n\n");
 
   char * buffer = (char*)calloc(messageSize, sizeof(char));
-  int n = 0;
-  while(strcmp(buffer, "Last_one") != 0){
-    free(buffer);
-    buffer = (char*)calloc(messageSize, sizeof(char));
+  while(1){
     listen(serverSocket, howManyConnections);
     printf("Server is listening...\n\n");
 
     clientSocket = accept(serverSocket, NULL, NULL);
     printf("Client connected!!\n");
-    n++;
 
-    printf("Waiting for message..\n");
-    recv(clientSocket, buffer, messageSize, 0);
-    printf("Recieved message: %s\n", buffer);
-    printf("Message size: %d\n\n", (int) strlen(buffer));
+    while(recv(clientSocket, buffer, messageSize, 0) != 0){
+      printf("Recieved message: %s\n", buffer);
+      printf("Message size: %d\n\n", (int) strlen(buffer));
+      send(clientSocket, buffer, strlen(buffer), 0);
+      free(buffer);
+      buffer = (char*)calloc(messageSize, sizeof(char));
+    }
+    printf("Client disconnected\n");
   }
-
-  printf("There was %d connections in total.\n", n);
 
   return 0;
 }

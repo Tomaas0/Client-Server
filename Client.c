@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -27,11 +28,27 @@ int main(int argc, char *argv[]){
   if(connStatus != -1) {
     printf("Connection is successful\n");
 
-    char * message = (char*)calloc(messageSize, sizeof(char));
+    char * message;
 
-  	scanf("%s", message);
-    send(cSocket, message, strlen(message), 0);
-    printf("---\nMessage sent: %s\nMessage size: %d\n---\n", message, (int) strlen(message));
+  	//scanf("%s", message);
+    while(1){
+      message = (char*)calloc(messageSize, sizeof(char));
+      fgets (message, messageSize, stdin);
+      *(message + strlen(message) - 1) = 0;
+      if(strcmp(message, "exit") == 0){
+        break;
+      }
+      send(cSocket, message, strlen(message), 0);
+      printf("---\nMessage sent: %s\nMessage size: %d\n---\n", message, (int) strlen(message));
+      free(message);
+      message = (char*)calloc(messageSize, sizeof(char));
+      recv(cSocket, message, messageSize, 0);
+      printf("Server response: %s\n---\n", message);
+      free(message);
+    }
+    if(close(cSocket) == 0){
+      printf("Connection closed\n");
+    }
   } else {
     printf("Connection is not successful\n");
   }
